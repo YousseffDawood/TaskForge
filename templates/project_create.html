@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}New Project — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-wrapper{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem 1rem;position:relative}
+.auth-wrapper::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(124,106,247,.08) 0%,transparent 70%);pointer-events:none}
+.create-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:520px;position:relative}
+.create-card h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.35rem}
+.create-card p{color:var(--muted);font-size:.875rem;margin-bottom:2rem}
+.field{margin-bottom:1.1rem}
+.field label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.field input,.field textarea{width:100%;padding:.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
+.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.actions{display:flex;gap:.75rem;margin-top:1.5rem}
+.btn-primary{background:var(--accent);color:#fff;padding:.7rem 1.5rem;border-radius:8px;border:none;font-weight:600;font-size:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s}
+.btn-primary:hover{opacity:.85}
+.btn-cancel{background:transparent;color:var(--muted);padding:.7rem 1.25rem;border-radius:8px;border:1px solid var(--border);font-size:.9rem;text-decoration:none;font-family:'DM Sans',sans-serif;transition:color .2s}
+.btn-cancel:hover{color:var(--text)}
+.error-box{background:rgba(247,106,106,.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:.65rem 1rem;font-size:.85rem;margin-bottom:1.25rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="create-card">
+        <h1>New Project</h1>
+        <p>Describe what you need and the team will take it from there.</p>
+
+        {% if error %}
+            <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="field">
+                <label>Project Name</label>
+                <input type="text" name="project_name" placeholder="e.g. Mobile App Redesign" required>
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <textarea name="project_description" rows="5" placeholder="What is this project about? What are the goals?"></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="btn-primary">Create Project →</button>
+                <a href="{% url 'projects_list' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

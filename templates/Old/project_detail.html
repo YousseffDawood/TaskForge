@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Projects</title>
+<style>
+    /* Base styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a40, #2d046e);
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 50px;
+        animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+        from {opacity:0;}
+        to {opacity:1;}
+    }
+
+    .container {
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        margin-bottom: 30px;
+        background: linear-gradient(90deg, #6a0dad, #1e3c72);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+        from {text-shadow: 0 0 5px #6a0dad;}
+        to {text-shadow: 0 0 20px #1e3c72;}
+    }
+
+    .projects-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .project-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 15px;
+        text-align: left;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .project-name {
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .project-description {
+        margin-top: 5px;
+        color: #ddd;
+        font-size: 1em;
+    }
+
+    /* Create button */
+    .create-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        font-size: 1.1em;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #6a0dad, #1e3c72);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .create-btn:hover {
+        background: linear-gradient(90deg, #1e3c72, #6a0dad);
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #6a0dad;
+    }
+
+    /* Messages */
+    .messages {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.1);
+        color: #ffdd57;
+        font-weight: bold;
+        text-align: center;
+        animation: bounce 0.8s ease;
+    }
+
+    @keyframes bounce {
+        0% {transform: translateY(-10px);}
+        50% {transform: translateY(5px);}
+        100% {transform: translateY(0);}
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>My Projects</h1>
+
+    {% if projects %}
+        <div class="projects-list">
+            {% for project in projects %}
+                <div class="project-card">
+                    <div class="project-name">{{ project.project_name }}</div>
+                    <div class="project-description">{{ project.project_description }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You are not part of any projects yet.</p>
+    {% endif %}
+
+    {% if request.user.roles == "CUSTOMER" %}
+        <a href="{% url 'project_create' %}" class="create-btn">Create Project</a>
+    {% else %}
+        <div class="messages">You do not have permission to create projects.</div>
+    {% endif %}
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>

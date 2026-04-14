@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% block title %}{{ task.task_name }} — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: .85rem;
+        padding: 1.5rem 0 0;
+        transition: color .2s
+    }
+
+    .back-link:hover {
+        color: var(--text)
+    }
+
+    .task-header {
+        padding: 1rem 0 2rem
+    }
+
+    .task-header h1 {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        margin-bottom: .75rem
+    }
+
+    .meta-row {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap
+    }
+
+    .pill {
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .25rem .7rem;
+        border-radius: 999px
+    }
+
+    .pill-todo {
+        background: rgba(107, 107, 128, .18);
+        color: var(--muted)
+    }
+
+    .pill-in_progress {
+        background: rgba(124, 106, 247, .15);
+        color: var(--accent)
+    }
+
+    .pill-done {
+        background: rgba(106, 247, 162, .12);
+        color: var(--success)
+    }
+
+    .meta-text {
+        font-size: .82rem;
+        color: var(--muted)
+    }
+
+    .layout {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 1.5rem;
+        padding-bottom: 3rem
+    }
+
+    @media(max-width:768px) {
+        .layout {
+            grid-template-columns: 1fr
+        }
+    }
+
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem
+    }
+
+    .card-title {
+        font-family: 'Syne', sans-serif;
+        font-size: .9rem;
+        font-weight: 700;
+        letter-spacing: -.01em;
+        margin-bottom: 1rem
+    }
+
+    .desc-text {
+        font-size: .875rem;
+        color: var(--muted);
+        line-height: 1.7
+    }
+
+    /* comments */
+    .comments-toggle {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: .6rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: .85rem;
+        font-family: 'DM Sans', sans-serif;
+        width: 100%;
+        margin-bottom: 1rem;
+        transition: border-color .2s, color .2s
+    }
+
+    .comments-toggle:hover {
+        border-color: var(--accent);
+        color: var(--text)
+    }
+
+    .comments-section {
+        display: none
+    }
+
+    .comments-section.open {
+        display: block
+    }
+
+    .comment-item {
+        display: flex;
+        gap: .75rem;
+        padding: .85rem 0;
+        border-bottom: 1px solid var(--border)
+    }
+
+    .comment-item:last-child {
+        border-bottom: none
+    }
+
+    .av {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .65rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0
+    }
+
+    .comment-body .cname {
+        font-size: .78rem;
+        font-weight: 600;
+        margin-bottom: .25rem
+    }
+
+    .comment-body .ctext {
+        font-size: .85rem;
+        color: var(--muted);
+        line-height: 1.55
+    }
+
+    .comment-body .cdate {
+        font-size: .72rem;
+        color: var(--muted);
+        margin-top: .25rem
+    }
+
+    .comment-form {
+        margin-top: 1rem
+    }
+
+    .comment-form textarea {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        padding: .75rem 1rem;
+        font-family: 'DM Sans', sans-serif;
+        font-size: .875rem;
+        resize: vertical;
+        outline: none;
+        transition: border-color .2s
+    }
+
+    .comment-form textarea:focus {
+        border-color: var(--accent)
+    }
+
+    .comment-form button {
+        margin-top: .5rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: .6rem 1.25rem;
+        border-radius: 8px;
+        font-size: .85rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: opacity .2s
+    }
+
+    .comment-form button:hover {
+        opacity: .85
+    }
+
+    /* sidebar */
+    .sidebar-label {
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: .4rem
+    }
+
+    .sidebar-value {
+        font-size: .875rem;
+        margin-bottom: 1rem
+    }
+
+    .assignee-row {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        margin-bottom: 1rem
+    }
+
+    .assignee-row .aname {
+        font-size: .875rem;
+        font-weight: 500
+    }
+
+    .assignee-row .arole {
+        font-size: .72rem;
+        color: var(--muted)
+    }
+
+    /* status update */
+    .status-form select {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: .5rem .75rem;
+        border-radius: 8px;
+        font-size: .85rem;
+        font-family: 'DM Sans', sans-serif;
+        outline: none;
+        margin-bottom: .5rem
+    }
+
+    .status-form button {
+        width: 100%;
+        background: var(--border);
+        color: var(--text);
+        border: none;
+        padding: .55rem;
+        border-radius: 8px;
+        font-size: .82rem;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+        transition: background .2s
+    }
+
+    .status-form button:hover {
+        background: var(--accent);
+        color: #fff
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- <div class="sidebar-value">
+        <a href="{% url 'project_detail' task.project.project %}"
+            style="color:var(--accent);text-decoration:none;font-size:.875rem">{{ task.project.project_name }}</a>
+    </div> -->
+
+    <div class="task-header">
+        <h1>{{ task.task_name }}</h1>
+        <div class="meta-row">
+            <span class="pill pill-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+            <span class="meta-text">Created {{ task.created_at|date:"M d, Y" }}</span>
+            <span class="meta-text">Assigned by {{ task.assigner.username }}</span>
+        </div>
+    </div>
+
+    <div class="layout">
+        <!-- MAIN -->
+        <div>
+            <div class="card">
+                <div class="card-title">Description</div>
+                <p class="desc-text">{{ task.task_description|default:"No description provided." }}</p>
+            </div>
+
+            <!-- COMMENTS -->
+            <button class="comments-toggle" onclick="toggleComments(this)">
+                <span>💬</span>
+                <span>Comments ({{ task.comments.count }})</span>
+                <span style="margin-left:auto">▾</span>
+            </button>
+
+            <div class="comments-section" id="commentsSection">
+                <!-- {% if user.roles != 'CUSTOMER' %} -->
+                <div class="card" style="padding:0 1.5rem">
+                    {% for comment in task.comments.all %}
+                    <div class="comment-item">
+                        <div class="av">{{ comment.commented_by.username|first|upper }}</div>
+                        <div class="comment-body">
+                            <div class="cname">{{ comment.commented_by.username }}</div>
+                            <div class="ctext">{{ comment.comment_text }}</div>
+                            <div class="cdate">{{ comment.created_at|date:"M d, Y · H:i"|default:"" }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="font-size:.85rem;color:var(--muted);padding:1.5rem 0">No comments yet.</p>
+                    {% endfor %}
+                </div>
+                <!-- {% endif %} -->
+                {% if user.roles != 'CUSTOMER' %}
+                <form method="POST" action="{% url 'add_comment' task.task %}" class="comment-form">
+                    {% csrf_token %}
+                    <textarea name="comment_text" rows="3" placeholder="Add a comment..."></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+            {% if user.roles == "ADMIN" or task.assigned_to == user %}
+            <div class="card">
+                <div class="sidebar-label">Update Status</div>
+                <form method="POST" action="{% url 'update_task_status' task.task %}" class="status-form">
+                    {% csrf_token %}
+                    <select name="status">
+                        <option value="TODO" {% if task.status == "TODO" %}selected{% endif %}>To Do</option>
+                        <option value="IN_PROGRESS" {% if task.status == "IN_PROGRESS" %}selected{% endif %}>In Progress
+                        </option>
+                        <option value="DONE" {% if task.status == "DONE" %}selected{% endif %}>Done</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="sidebar-label">Assigned To</div>
+                <div class="assignee-row">
+                    <div class="av">{{ task.assigned_to.username|first|upper }}</div>
+                    <div>
+                        <div class="aname">{{ task.assigned_to.username }}</div>
+                        <div class="arole">{{ task.assigned_to.get_job_title_display|default:"Employee" }}</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-label">Project</div>
+                <div class="sidebar-value">
+                    <a href="{% url 'project_detail' task.project.project %}"
+                        style="color:var(--accent);text-decoration:none;font-size:.875rem">{{  task.project.project_name  }}</a>
+                </div>
+
+                <div class="sidebar-label">Assigned By</div>
+                <div class="sidebar-value" style="color:var(--muted)">{{ task.assigner.username }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleComments(btn) {
+        const s = document.getElementById('commentsSection');
+        s.classList.toggle('open');
+        btn.querySelector('span:last-child').textContent = s.classList.contains('open') ? '▴' : '▾';
+    }
+</script>
+{% endblock %}

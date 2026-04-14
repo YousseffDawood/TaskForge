@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Projects — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-header{padding:2rem 0 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.page-header h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.03em}
+.btn-new{background:var(--accent);color:#fff;padding:.6rem 1.25rem;border-radius:8px;text-decoration:none;font-weight:600;font-size:.875rem;transition:opacity .2s}
+.btn-new:hover{opacity:.85}
+.filters{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-btn{padding:.35rem .9rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;padding-bottom:3rem}
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:.85rem;transition:border-color .2s,transform .2s}
+.pcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.pcard-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:-.01em}
+.pill{font-size:.68rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.pill-todo{background:rgba(107,107,128,.18);color:var(--muted)}
+.pill-in_progress{background:rgba(124,106,247,.15);color:var(--accent)}
+.pill-done{background:rgba(106,247,162,.12);color:var(--success)}
+.pcard-desc{font-size:.82rem;color:var(--muted);line-height:1.55;flex:1}
+.pcard-footer{display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--muted);padding-top:.75rem;border-top:1px solid var(--border)}
+.avatar-stack{display:flex}
+.avatar-stack .av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;margin-left:-5px;border:2px solid var(--surface)}
+.avatar-stack .av:first-child{margin-left:0}
+.empty-state{text-align:center;padding:5rem 1rem;color:var(--muted)}
+.empty-state .ei{font-size:2.5rem;margin-bottom:1rem}
+.empty-state h3{font-family:'Syne',sans-serif;color:var(--text);font-size:1rem;margin-bottom:.4rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Projects</h1>
+        {% if user.roles == 'CUSTOMER' %}
+            <a href="{% url 'create_project' %}" class="btn-new">+ New Project</a>
+        {% endif %}
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterProjects('all', this)">All</button>
+        <button class="filter-btn" onclick="filterProjects('TODO', this)">To Do</button>
+        <button class="filter-btn" onclick="filterProjects('IN_PROGRESS', this)">In Progress</button>
+        <button class="filter-btn" onclick="filterProjects('DONE', this)">Done</button>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid">
+        {% for project in projects %}
+            {% if user.roles != 'CUSTOMER' %}
+                <a href="{% url 'project_detail' project.project %}" class="pcard" data-status="{{ project.state }}">
+            {% else %}
+                <div class="pcard disabled" data-status="{{ project.state }}">
+            {% endif %}
+
+                <div class="pcard-top">
+                    <span class="pcard-name">{{ project.project_name }}</span>
+                    <span class="pill pill-{{ project.state|lower }}">{{ project.get_state_display }}</span>
+                </div>
+
+                <p class="pcard-desc">{{ project.project_description|truncatechars:100 }}</p>
+
+                <div class="pcard-footer">
+                    <div class="avatar-stack">
+                        {% for member in project.project_members.all|slice:":5" %}
+                            <div class="av">{{ member.username|first|upper }}</div>
+                        {% endfor %}
+                    </div>
+                    <span>{{ project.tasks.count }} tasks</span>
+                </div>
+
+            {% if user.roles != 'CUSTOMER' %}
+                </a>
+            {% else %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function filterProjects(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.pcard').forEach(card => {
+        card.style.display = (status === 'all' || card.dataset.status === status) ? 'flex' : 'none';
+    });
+}
+</script>
+{% endblock %}

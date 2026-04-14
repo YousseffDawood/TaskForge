@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Index Page{% endblock %}
+
+{% block header %}Hello Users{% endblock %}
+
+{% block content %}This is the landing page.{% endblock %}
+
+{% block button %}
+<a href="{% url 'home' %}"><button>Go to Home</button></a>
+{% endblock %}

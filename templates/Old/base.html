@@ -1,0 +1,146 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f172a, #1e1b4b, #312e81);
+        color: white;
+        overflow-x: hidden;
+    }
+
+    /* Animated gradient glow */
+    body::before {
+        content: "";
+        position: fixed;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(139,92,246,0.4), transparent 70%);
+        top: -200px;
+        left: -200px;
+        animation: moveGlow 10s infinite alternate ease-in-out;
+        z-index: 0;
+    }
+
+    @keyframes moveGlow {
+        0% { transform: translate(0,0); }
+        100% { transform: translate(200px,200px); }
+    }
+
+    .navbar {
+        position: relative;
+        z-index: 2;
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #c4b5fd;
+    }
+
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        margin: auto;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        background: linear-gradient(to right, #a5b4fc, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeUp 1s ease-out;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #d1d5db;
+        margin-bottom: 30px;
+        animation: fadeUp 1.5s ease-out;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 12px 28px;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.3s;
+        box-shadow: 0 5px 20px rgba(99,102,241,0.5);
+        animation: fadeUp 2s ease-out;
+    }
+
+    .btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 10px 30px rgba(139,92,246,0.7);
+    }
+
+    @keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 0.9rem;
+        color: #9ca3af;
+        margin-top: 60px;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">TaskFlow</div>
+    {% block nav %}{% endblock %}
+</div>
+
+<div class="container">
+    <h1>{% block header %}Welcome{% endblock %}</h1>
+    <p>{% block content %}Manage your workflow efficiently.{% endblock %}</p>
+    {% block cta %}{% endblock %}
+</div>
+
+<div class="footer">
+    {% block footer %}
+    Built with Django • Mini Jira Clone
+    {% endblock %}
+</div>
+
+</body>
+</html>

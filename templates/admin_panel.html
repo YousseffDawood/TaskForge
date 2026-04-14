@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% block title %}Admin Panel — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── ROOT TOKENS ── */
+  :root {
+    --accent:  #7c6af7;
+    --accent2: #f7a26a;
+    --success: #6af7a2;
+    --danger:  #f76a6a;
+    --surface: #1a1a2e;
+    --border:  rgba(255,255,255,.08);
+    --muted:   rgba(255,255,255,.45);
+  }
+
+  /* ── HERO ── */
+  .ap-hero {
+    padding: 2.5rem 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .ap-hero-icon {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 0 28px rgba(124,106,247,.4);
+    flex-shrink: 0;
+  }
+  .ap-hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.85rem; font-weight: 800; letter-spacing: -.04em;
+  }
+  .ap-hero p { font-size: .85rem; color: var(--muted); margin-top: .25rem; }
+
+  /* ── STATS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    position: relative; overflow: hidden;
+    opacity: 0; transform: translateY(16px);
+    animation: fadeUp .45s ease forwards;
+  }
+  .stat-card:nth-child(1){ animation-delay:.05s }
+  .stat-card:nth-child(2){ animation-delay:.12s }
+  .stat-card:nth-child(3){ animation-delay:.19s }
+  .stat-card::before {
+    content:''; position:absolute; inset:0 0 auto 0; height:2px;
+    background: linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:0; transition:opacity .3s;
+  }
+  .stat-card:hover::before { opacity:1 }
+  .stat-label {
+    font-size:.72rem; font-weight:600; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:.5rem;
+  }
+  .stat-value {
+    font-family:'Syne',sans-serif;
+    font-size:2rem; font-weight:800; letter-spacing:-.04em; line-height:1;
+  }
+
+  /* ── ACTIONS BAR ── */
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+  .actions-bar h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 700; letter-spacing: -.02em;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem; font-weight: 600;
+    padding: .45rem .9rem;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    text-decoration: none;
+  }
+  .btn:hover { opacity:.82; transform:translateY(-1px) }
+  .btn:active { transform:translateY(0) }
+  .btn-accent  { background: var(--accent);  color: #fff }
+  .btn-danger  { background: var(--danger);  color: #fff }
+  .btn-ghost   { background: var(--border);  color: var(--text, #fff) }
+  .btn-success { background:rgba(106,247,162,.18); color:var(--success) }
+
+  /* ── PROJECT GRID ── */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.35rem 1.5rem;
+    display: flex; flex-direction: column; gap: 1rem;
+    opacity: 0; transform: translateY(14px);
+    animation: fadeUp .4s ease forwards;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .project-card:hover {
+    border-color: rgba(124,106,247,.45);
+    box-shadow: 0 6px 30px rgba(124,106,247,.1);
+  }
+
+  /* head */
+  .pc-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap:.5rem;
+  }
+  .pc-name {
+    font-family:'Syne',sans-serif;
+    font-size:1rem; font-weight:700; letter-spacing:-.02em;
+    text-decoration:none; color:inherit; transition:color .2s;
+  }
+  .pc-name:hover { color:var(--accent) }
+  .pc-owner { font-size:.75rem; color:var(--muted); margin-top:.2rem }
+
+  /* state pill */
+  .state-pill {
+    font-size:.65rem; font-weight:700;
+    padding:.25rem .65rem; border-radius:999px; flex-shrink:0; letter-spacing:.04em;
+  }
+  .state-TODO        { background:rgba(107,107,128,.18); color:var(--muted) }
+  .state-IN_PROGRESS { background:rgba(124,106,247,.15); color:var(--accent) }
+  .state-DONE        { background:rgba(106,247,162,.12); color:var(--success) }
+
+  /* description */
+  .pc-desc {
+    font-size:.82rem; color:var(--muted);
+    line-height:1.55;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* members */
+  .members-label {
+    font-size:.68rem; font-weight:600; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:.5rem;
+  }
+  .members-list { display:flex; flex-wrap:wrap; gap:.4rem }
+
+  .member-chip {
+    display:inline-flex; align-items:center; gap:.3rem;
+    background:rgba(30,30,46,.9);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:.2rem .55rem .2rem .3rem;
+    font-size:.78rem;
+    transition:border-color .2s;
+  }
+  .member-chip:hover { border-color:var(--danger) }
+  .mini-av {
+    width:22px; height:22px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:.58rem; font-weight:700; color:#fff; flex-shrink:0;
+  }
+  .chip-remove {
+    background:none; border:none; color:var(--muted);
+    cursor:pointer; font-size:.75rem; padding:0; line-height:1;
+    transition:color .2s;
+  }
+  .chip-remove:hover { color:var(--danger) }
+
+  .no-members { font-size:.8rem; color:var(--muted) }
+
+  /* add-member row */
+  .add-row { display:flex; gap:.5rem; align-items:center; margin-top:.25rem }
+  .inline-select {
+    flex:1;
+    background:var(--bg,#12121f);
+    border:1px solid var(--border);
+    color:var(--text,#fff);
+    font-family:'DM Sans',sans-serif;
+    font-size:.8rem;
+    padding:.32rem .6rem;
+    border-radius:7px; outline:none; cursor:pointer;
+    transition:border-color .2s;
+  }
+  .inline-select:focus { border-color:var(--accent) }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    to { opacity:1; transform:translateY(0) }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:640px){
+    .project-grid { grid-template-columns:1fr }
+    .ap-hero h1  { font-size:1.4rem }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- HERO -->
+  <div class="ap-hero">
+    <div class="ap-hero-icon">⚙️</div>
+    <div>
+      <h1>Admin Panel</h1>
+      <p>Manage every project and its members across the workspace.</p>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Projects</div>
+      <div class="stat-value" style="color:var(--accent)">{{ all_Projects.count }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value" style="color:var(--accent2)">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Employees</div>
+      <div class="stat-value" style="color:var(--success)">{{ all_employees.count }}</div>
+    </div>
+  </div>
+
+  <!-- ACTIONS BAR -->
+  <div class="actions-bar">
+    <h2>📁 All Projects</h2>
+    <a href="{% url 'promote_users' %}" class="btn btn-accent">
+      👥 Manage Users &amp; Roles
+    </a>
+  </div>
+
+  <!-- MESSAGES -->
+  {% for msg in messages %}
+  <div class="msg" style="
+    background:{% if msg.tags == 'success' %}rgba(106,247,162,.12){% else %}rgba(247,106,106,.12){% endif %};
+    border:1px solid {% if msg.tags == 'success' %}rgba(106,247,162,.3){% else %}rgba(247,106,106,.3){% endif %};
+    color:{% if msg.tags == 'success' %}var(--success){% else %}var(--danger){% endif %};
+    border-radius:10px; padding:.75rem 1rem; margin-bottom:1rem; font-size:.875rem;">
+    {{ msg }}
+  </div>
+  {% endfor %}
+
+  <!-- PROJECT GRID -->
+  {% if all_Projects %}
+  <div class="project-grid">
+    {% for project in all_Projects %}
+    <div class="project-card" style="animation-delay:{{ forloop.counter0 }}00ms">
+
+      <!-- head -->
+      <div class="pc-head">
+        <div>
+          <a href="{% url 'project_detail' project.project %}" class="pc-name">
+            {{ project.project_name }}
+          </a>
+          <div class="pc-owner">Owner: {{ project.project_owner.username }}</div>
+        </div>
+        <span class="state-pill state-{{ project.state }}">{{ project.get_state_display }}</span>
+      </div>
+
+      <!-- description -->
+      {% if project.project_description %}
+      <div class="pc-desc">{{ project.project_description }}</div>
+      {% endif %}
+
+      <!-- members -->
+      <div>
+        <div class="members-label">Members ({{ project.project_members.count }})</div>
+        <div class="members-list">
+          {% for member in project.project_members.all %}
+          <div class="member-chip">
+            <div class="mini-av">{{ member.username|first|upper }}</div>
+            <span>{{ member.username }}</span>
+            <!-- remove -->
+            <form method="POST" action="{% url 'admin_manage_member' project.project %}" style="margin:0">
+              {% csrf_token %}
+              <input type="hidden" name="action"    value="remove">
+              <input type="hidden" name="member_id" value="{{ member.pk }}">
+              <button type="submit" class="chip-remove" title="Remove {{ member.username }}">✕</button>
+            </form>
+          </div>
+          {% empty %}
+          <span class="no-members">No members yet.</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- add member -->
+      <form method="POST" action="{% url 'admin_manage_member' project.project %}" class="add-row">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <select name="member_id" class="inline-select">
+          <option value="" disabled selected>Add a member…</option>
+          {% for u in all_users %}
+            {% if u not in project.project_members.all %}
+            <option value="{{ u.pk }}">{{ u.username }} ({{ u.get_roles_display }})</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-accent" style="white-space:nowrap">＋ Add</button>
+      </form>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p style="color:var(--muted);font-size:.9rem;padding:2rem 0">No projects found.</p>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-dismiss messages
+  setTimeout(() => {
+    document.querySelectorAll('.msg').forEach(m => {
+      m.style.transition = 'opacity .4s';
+      m.style.opacity = '0';
+      setTimeout(() => m.remove(), 400);
+    });
+  }, 3500);
+</script>
+{% endblock %}

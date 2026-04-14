@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-header{padding:2rem 0 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.page-header h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.03em}
+.page-header span{font-size:.82rem;color:var(--muted)}
+.notif-list{display:flex;flex-direction:column;gap:.6rem;padding-bottom:3rem;max-width:680px}
+.notif-item{display:flex;align-items:flex-start;gap:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;transition:border-color .2s}
+.notif-item.unread{border-color:rgba(124,106,247,.3);background:rgba(124,106,247,.04)}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px}
+.notif-dot.read{background:var(--border)}
+.notif-body{flex:1;min-width:0}
+.notif-msg{font-size:.875rem;line-height:1.55;margin-bottom:.3rem}
+.notif-time{font-size:.72rem;color:var(--muted)}
+.empty-state{text-align:center;padding:5rem 1rem;color:var(--muted);max-width:680px}
+.empty-state .ei{font-size:2.5rem;margin-bottom:1rem}
+.empty-state h3{font-family:'Syne',sans-serif;color:var(--text);font-size:1rem;margin-bottom:.4rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Notifications</h1>
+        <span>{{ notifications.count }} total</span>
+    </div>
+
+    <div class="notif-list">
+        {% for notif in notifications %}
+        <div class="notif-item {% if not notif.is_read %}unread{% endif %}">
+            <div class="notif-dot {% if notif.is_read %}read{% endif %}"></div>
+            <div class="notif-body">
+                <div class="notif-msg">{{ notif.message }}</div>
+                <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="ei">🔔</div>
+            <h3>All caught up</h3>
+            <p>No notifications yet. They'll appear here when something changes.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

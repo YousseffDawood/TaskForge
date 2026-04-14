@@ -1,0 +1,468 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users — Taska Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --success: #6af7a2;
+    --danger: #f76a6a;
+    --surface: #1a1a2e;
+    --border: rgba(255, 255, 255, .08);
+    --muted: rgba(255, 255, 255, .45);
+  }
+
+  /* ── HERO ── */
+  .pu-hero {
+    padding: 2.5rem 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .pu-hero-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 0 28px rgba(124, 106, 247, .4);
+    flex-shrink: 0;
+  }
+
+  .pu-hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -.04em;
+  }
+
+  .pu-hero p {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-top: .25rem
+  }
+
+  /* ── BACK LINK ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: .85rem;
+    margin-bottom: 1.5rem;
+    transition: color .2s;
+  }
+
+  .back-link:hover {
+    color: var(--accent)
+  }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: .4rem .9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(124, 106, 247, .1);
+  }
+
+  /* ── USER GRID ── */
+  .user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.1rem;
+  }
+
+  .user-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeUp .4s ease forwards;
+    transition: border-color .25s, box-shadow .25s;
+  }
+
+  .user-card:hover {
+    border-color: rgba(124, 106, 247, .4);
+    box-shadow: 0 6px 28px rgba(124, 106, 247, .1);
+  }
+
+  /* avatar row */
+  .uc-head {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+  }
+
+  .av-lg {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .uc-name {
+    font-weight: 700;
+    font-size: .95rem;
+  }
+
+  .uc-email {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: .1rem
+  }
+
+  .uc-job {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .15rem;
+    font-style: italic
+  }
+
+  /* role pill */
+  .role-pill {
+    display: inline-block;
+    font-size: .68rem;
+    font-weight: 700;
+    padding: .22rem .65rem;
+    border-radius: 999px;
+    letter-spacing: .04em;
+  }
+
+  .role-ADMIN {
+    background: rgba(247, 162, 106, .15);
+    color: var(--accent2)
+  }
+
+  .role-EMPLOYEE {
+    background: rgba(124, 106, 247, .15);
+    color: var(--accent)
+  }
+
+  .role-CUSTOMER {
+    background: rgba(106, 247, 162, .12);
+    color: var(--success)
+  }
+
+  /* badge row */
+  .uc-badges {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap
+  }
+
+  /* projects count */
+  .proj-count {
+    font-size: .72rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: .18rem .55rem;
+  }
+
+  /* promote form */
+  .promote-form {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+  }
+
+  .inline-select {
+    flex: 1;
+    background: #12121f;
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    padding: .32rem .6rem;
+    border-radius: 7px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+
+  .inline-select:focus {
+    border-color: var(--accent)
+  }
+
+  /* btn */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: .4rem .85rem;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn:hover {
+    opacity: .82;
+    transform: translateY(-1px)
+  }
+
+  .btn:active {
+    transform: translateY(0)
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    color: #fff
+  }
+
+  .btn-ghost {
+    background: var(--border);
+    color: var(--text, #fff)
+  }
+
+  /* you-badge */
+  .you-label {
+    font-size: .78rem;
+    color: var(--muted);
+    font-style: italic
+  }
+
+  /* search */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    padding: .65rem 1rem .65rem 2.6rem;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color .2s;
+    box-sizing: border-box;
+  }
+
+  .search-wrap input:focus {
+    border-color: var(--accent)
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: .9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    to {
+      opacity: 1;
+      transform: translateY(0)
+    }
+  }
+
+  @media(max-width:640px) {
+    .user-grid {
+      grid-template-columns: 1fr
+    }
+
+    .pu-hero h1 {
+      font-size: 1.4rem
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- BACK -->
+  <a href="{% url 'admin_panel' %}" class="back-link">← Back to Admin Panel</a>
+
+  <!-- HERO -->
+  <div class="pu-hero">
+    <div class="pu-hero-icon">👥</div>
+    <div>
+      <h1>View all Users</h1>
+      <p>View all {{ total_users }} user{{ total_users|pluralize }} .</p>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  {% for msg in messages %}
+  <div class="msg" style="
+    background:{% if msg.tags == 'success' %}rgba(106,247,162,.12){% else %}rgba(247,106,106,.12){% endif %};
+    border:1px solid {% if msg.tags == 'success' %}rgba(106,247,162,.3){% else %}rgba(247,106,106,.3){% endif %};
+    color:{% if msg.tags == 'success' %}var(--success){% else %}var(--danger){% endif %};
+    border-radius:10px; padding:.75rem 1rem; margin-bottom:1rem; font-size:.875rem;">
+    {{ msg }}
+  </div>
+  {% endfor %}
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.35-4.35" />
+    </svg>
+    <input type="text" id="user-search" placeholder="Search users by name or email…" autocomplete="off">
+  </div>
+
+  <!-- ROLE FILTERS -->
+  <div class="filters-bar">
+    <button class="filter-btn active" data-role="ALL" id="filter-all">All ({{ total_users }})</button>
+    <button class="filter-btn" data-role="ADMIN" id="filter-admin">Admin</button>
+    <button class="filter-btn" data-role="EMPLOYEE" id="filter-employee">Employee</button>
+    <button class="filter-btn" data-role="CUSTOMER" id="filter-customer">Customer</button>
+  </div>
+
+  <!-- USER GRID -->
+  <div class="user-grid" id="user-grid">
+    {% for u in all_users %}
+    <div class="user-card" data-role="{{ u.roles }}" data-name="{{ u.username|lower }}" data-email="{{ u.email|lower }}"
+      style="animation-delay:{{ forloop.counter0 }}0ms">
+
+      <!-- head -->
+      <div class="uc-head">
+        <div class="av-lg">{{ u.username|first|upper }}</div>
+        <div>
+          <div class="uc-name">{{ u.username }}</div>
+          <div class="uc-email">{{ u.email }}</div>
+          {% if u.job_title %}
+          <div class="uc-job">{{ u.get_job_title_display }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- badges -->
+      <div class="uc-badges">
+        <span class="role-pill role-{{ u.roles }}">{{ u.get_roles_display }}</span>
+        <span class="proj-count">{{ u.projects.count }} project{{ u.projects.count|pluralize }}</span>
+      </div>
+
+      <!-- promote form OR "that's you" -->
+      <!-- {% if u != request.user %}
+          <form method="POST" action="{% url 'change_user_role' u.pk %}" class="promote-form">
+            {% csrf_token %}
+            
+            <select name="role" class="inline-select" id="role-select-{{ u.pk }}">
+              <option value="EMPLOYEE" {% if u.roles == 'EMPLOYEE' %}selected{% endif %}>Employee</option>
+              <option value="CUSTOMER" {% if u.roles == 'CUSTOMER' %}selected{% endif %}>Customer</option>
+            </select>
+            
+            <button type="submit" class="btn btn-accent">Apply</button>
+          </form>
+        {% else %}
+          <span class="you-label">✦ That's you</span>
+        {% endif %} -->
+
+    </div>
+    {% empty %}
+    <p style="color:var(--muted)">No users found.</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── Role filter ──
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.user-card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const role = btn.dataset.role;
+      cards.forEach(c => {
+        c.style.display = (role === 'ALL' || c.dataset.role === role) ? '' : 'none';
+      });
+    });
+  });
+
+  // ── Live search ──
+  document.getElementById('user-search').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    cards.forEach(c => {
+      const match = c.dataset.name.includes(q) || c.dataset.email.includes(q);
+      c.style.display = match ? '' : 'none';
+    });
+    // reset filter buttons visual
+    if (q) filterBtns.forEach(b => b.classList.remove('active'));
+    else {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      document.getElementById('filter-all').classList.add('active');
+    }
+  });
+
+  // ── Live role colour preview ──
+  document.querySelectorAll('.inline-select').forEach(sel => {
+    const card = sel.closest('.user-card');
+    sel.addEventListener('change', () => {
+      const pill = card.querySelector('.role-pill');
+      if (!pill) return;
+      const map = { EMPLOYEE: 'Employee', CUSTOMER: 'Customer' };
+      pill.className = 'role-pill role-' + sel.value;
+      pill.textContent = map[sel.value] || sel.value;
+    });
+  });
+
+  // ── Auto-dismiss messages ──
+  setTimeout(() => {
+    document.querySelectorAll('.msg').forEach(m => {
+      m.style.transition = 'opacity .4s';
+      m.style.opacity = '0';
+      setTimeout(() => m.remove(), 400);
+    });
+  }, 3500);
+</script>
+{% endblock %}

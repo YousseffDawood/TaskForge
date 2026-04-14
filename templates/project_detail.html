@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.project_name }} — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+.back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--muted);text-decoration:none;font-size:.85rem;padding:1.5rem 0 0;transition:color .2s}
+.back-link:hover{color:var(--text)}
+.project-header{padding:1rem 0 2rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.project-header-left h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem}
+.meta-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.pill{font-size:.72rem;font-weight:600;padding:.25rem .7rem;border-radius:999px}
+.pill-todo{background:rgba(107,107,128,.18);color:var(--muted)}
+.pill-in_progress{background:rgba(124,106,247,.15);color:var(--accent)}
+.pill-done{background:rgba(106,247,162,.12);color:var(--success)}
+.meta-text{font-size:.82rem;color:var(--muted)}
+.header-actions{display:flex;gap:.75rem;flex-wrap:wrap}
+.btn{padding:.6rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s,transform .2s}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+.layout{display:grid;grid-template-columns:1fr 280px;gap:1.5rem;padding-bottom:3rem}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+.section-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;letter-spacing:-.01em;margin-bottom:1rem}
+.tasks-list{display:flex;flex-direction:column;gap:.75rem}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:1rem;transition:border-color .2s}
+.task-card:hover{border-color:var(--accent)}
+.task-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-todo{background:var(--muted)}
+.dot-in_progress{background:var(--accent)}
+.dot-done{background:var(--success)}
+.task-info{flex:1;min-width:0}
+.task-name{font-weight:500;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-meta{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+.task-assignee{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.sidebar-card-title{font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem}
+.member-row{display:flex;align-items:center;gap:.75rem;padding:.4rem 0}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.member-info .mname{font-size:.875rem;font-weight:500}
+.member-info .mrole{font-size:.72rem;color:var(--muted)}
+.empty-tasks{text-align:center;padding:3rem 1rem;color:var(--muted);background:var(--surface);border:1px dashed var(--border);border-radius:12px}
+.empty-tasks p{font-size:.875rem}
+/* status select */
+.status-form select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.4rem .7rem;border-radius:6px;font-size:.8rem;font-family:'DM Sans',sans-serif;width:100%;cursor:pointer}
+.status-form button{margin-top:.5rem;width:100%;padding:.5rem;background:var(--border);color:var(--text);border:none;border-radius:6px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s}
+.status-form button:hover{background:var(--accent);color:#fff}
+
+/* ── MODALS ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:460px;margin:1rem}
+.modal h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:-.02em;margin-bottom:1.5rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.field input,.field select,.field textarea{width:100%;padding:.65rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field select option{background:var(--surface)}
+.modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+.btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);padding:.6rem 1.1rem;border-radius:8px;font-size:.875rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-cancel:hover{color:var(--text)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'projects_list' %}" class="back-link">← Back to Projects</a>
+
+    <div class="project-header">
+        <div class="project-header-left">
+            <h1>{{ project.project_name }}</h1>
+            <div class="meta-row">
+                <span class="pill pill-{{ project.state|lower }}">{{ project.get_state_display }}</span>
+                <span class="meta-text">Owner: {{ project.project_owner.username }}</span>
+                <span class="meta-text">{{ project.tasks.count }} tasks</span>
+            </div>
+        </div>
+
+        {% if user.roles == 'ADMIN' %}
+        <div class="header-actions">
+            <button class="btn btn-ghost" onclick="openModal('addMemberModal')">+ Add Member</button>
+            <button class="btn btn-primary" onclick="openModal('createTaskModal')">+ New Task</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="layout">
+        <!-- TASKS -->
+        <div>
+            <div class="section-title">Tasks</div>
+            <div class="tasks-list">
+                {% for task in project.tasks.all %}
+                <a href="{% url 'task_detail' task.task %}" class="task-card">
+                    <div class="task-status-dot dot-{{ task.status|lower }}"></div>
+                    <div class="task-info">
+                        <div class="task-name">{{ task.task_name }}</div>
+                        <div class="task-meta">{{ task.get_status_display }} · {{ task.created_at|date:"M d" }}</div>
+                    </div>
+                    <div class="task-assignee">{{ task.assigned_to.username }}</div>
+                </a>
+                {% empty %}
+                <div class="empty-tasks">
+                    <p>No tasks yet.{% if user.roles == 'ADMIN' %} Create the first one.{% endif %}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div>
+            {% if user.roles == 'ADMIN' %}
+            <div class="sidebar-card">
+                <div class="sidebar-card-title">Project Status</div>
+                    <form method="POST" action="{% url 'update_project_status' project.project %}" class="status-form">
+                         {% csrf_token %}
+                    <select name="state">
+                        <option value="TODO" {% if project.state == 'TODO' %}selected{% endif %}>To Do</option>
+                        <option value="IN_PROGRESS" {% if project.state == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                        <option value="DONE" {% if project.state == 'DONE' %}selected{% endif %}>Done</option>
+                    </select>
+                    <button type="submit">Update Status</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="sidebar-card">
+                <div class="sidebar-card-title">Members ({{ project.project_members.count }})</div>
+                {% for member in project.project_members.all %}
+                    <div class="member-row">
+                        <div class="av">{{ member.username|first|upper }}</div>
+                        <div class="member-info">
+                            <div class="mname">{{ member.username }}</div>
+                            <div class="mrole">{{ member.get_job_title_display|default:"No title" }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="font-size:.82rem;color:var(--muted)">No members yet.</p>
+                {% endfor %}
+            </div>
+
+            <div class="sidebar-card">
+                <div class="sidebar-card-title">About</div>
+                <p style="font-size:.82rem;color:var(--muted);line-height:1.6">{{ project.project_description }}</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+{% if user.roles == 'ADMIN' %}
+<!-- CREATE TASK MODAL -->
+<div class="modal-bg" id="createTaskModal">
+    <div class="modal">
+        <h2>New Task</h2>
+        <form method="POST" action="{% url 'create_task' %}">
+            {% csrf_token %}
+            <input type="hidden" name="project_id" value="{{ project.project }}">
+            <div class="field">
+                <label>Task Name</label>
+                <input type="text" name="task_name" placeholder="e.g. Design login screen" required>
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <textarea name="task_description" rows="3" placeholder="What needs to be done?"></textarea>
+            </div>
+            <div class="field">
+                <label>Assign To</label>
+                <select name="assigned_to" required>
+                    <option value="">Select employee</option>
+                    {% for member in project.project_members.all %}
+                        <option value="{{ member.id }}">{{ member.username }} — {{ member.get_job_title_display|default:"Employee" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal('createTaskModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ADD MEMBER MODAL -->
+<div class="modal-bg" id="addMemberModal">
+    <div class="modal">
+        <h2>Add Member</h2>
+        <form method="POST" action="{% url 'add_member' project.project %}">
+            {% csrf_token %}
+            <div class="field">
+                <label>Username</label>
+                <input type="text" name="member_username" placeholder="Enter exact username" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal('addMemberModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Member</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(bg => {
+    bg.addEventListener('click', e => { if(e.target === bg) bg.classList.remove('open'); });
+});
+</script>
+{% endblock %}

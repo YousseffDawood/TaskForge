@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Tasks — Taska{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-header{padding:2rem 0 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.page-header h1{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.03em}
+.filters{display:flex;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-btn{padding:.35rem .9rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tasks-list{display:flex;flex-direction:column;gap:.75rem;padding-bottom:3rem}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;text-decoration:none;color:var(--text);display:flex;align-items:center;gap:1rem;transition:border-color .2s,transform .2s}
+.task-card:hover{border-color:var(--accent);transform:translateX(3px)}
+.task-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot-todo{background:var(--muted)}
+.dot-in_progress{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.dot-done{background:var(--success)}
+.task-info{flex:1;min-width:0}
+.task-name{font-weight:500;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem}
+.task-meta{font-size:.75rem;color:var(--muted)}
+.task-right{display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.pill{font-size:.68rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+.pill-todo{background:rgba(107,107,128,.18);color:var(--muted)}
+.pill-in_progress{background:rgba(124,106,247,.15);color:var(--accent)}
+.pill-done{background:rgba(106,247,162,.12);color:var(--success)}
+.task-project{font-size:.75rem;color:var(--muted);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty-state{text-align:center;padding:5rem 1rem;color:var(--muted)}
+.empty-state .ei{font-size:2.5rem;margin-bottom:1rem}
+.empty-state h3{font-family:'Syne',sans-serif;color:var(--text);font-size:1rem;margin-bottom:.4rem}
+.error-box{background:rgba(247,106,106,.1);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:.65rem 1rem;font-size:.85rem;margin-bottom:1.25rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Tasks</h1>
+    </div>
+
+    {% if error %}
+        <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterTasks('all', this)">All</button>
+        <button class="filter-btn" onclick="filterTasks('TODO', this)">To Do</button>
+        <button class="filter-btn" onclick="filterTasks('IN_PROGRESS', this)">In Progress</button>
+        <button class="filter-btn" onclick="filterTasks('DONE', this)">Done</button>
+    </div>
+
+    <div class="tasks-list" id="tasksList">
+        {% for task in tasks %}
+        <a href="{% url 'task_detail' task.task %}" class="task-card" data-status="{{ task.status }}">
+            <div class="task-status-dot dot-{{ task.status|lower }}"></div>
+            <div class="task-info">
+                <div class="task-name">{{ task.task_name }}</div>
+                <div class="task-meta">
+                    Assigned by {{ task.assigner.username }} · {{ task.created_at|date:"M d, Y" }}
+                </div>
+            </div>
+            <div class="task-right">
+                <span class="task-project">{{ task.project.project_name }}</span>
+                <span class="pill pill-{{ task.status|lower }}">{{ task.get_status_display }}</span>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <div class="ei">✅</div>
+            <h3>No tasks yet</h3>
+            <p>Tasks assigned to you will appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function filterTasks(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.style.display = (status === 'all' || card.dataset.status === status) ? 'flex' : 'none';
+    });
+}
+</script>
+{% endblock %}
