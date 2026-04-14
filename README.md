@@ -1,3 +1,4 @@
+<img width="1913" height="943" alt="1" src="https://github.com/user-attachments/assets/1a61e6da-8540-4c29-b7c3-bfafbc4f762e" />
 # TaskForge
 
 A role-based project management web application built with Django. TaskForge allows teams to manage projects, assign tasks, track progress, and communicate through comments — all with a clean, modern interface.
